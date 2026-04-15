@@ -8,177 +8,318 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/all.min.css">
     
     <style>
         :root {
             --bg-dark-space: #0a0c1a;
-            --surface-glass: rgba(26, 28, 45, 0.7);
-            --primary-accent: #818cf8;
+            --surface-glass: rgba(26, 28, 45, 0.7); /* Bleu-gris transparent */
+            --primary-accent: #818cf8; /* Indigo clair */
             --text-primary: #e2e8f0;
             --text-secondary: #94a3b8;
-            --border-glow: rgba(129, 140, 248, 0.3);
+            --border-glow: rgba(129, 140, 248, 0.2);
             --success-color: #34d399;
             --error-color: #f87171;
             color-scheme: dark;
         }
 
+        *, *::before, *::after { box-sizing: border-box; }
+        
         body {
-            background: radial-gradient(circle at top right, #1e1b4b, #0a0c10);
-            color: var(--text-primary);
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: var(--bg-dark-space);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
         }
 
         .container {
-            width: 90%;
-            max-width: 600px;
-            background: var(--surface-glass);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-glow);
-            border-radius: 24px;
-            padding: 2.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 80px 24px;
+            position: relative;
+            z-index: 1;
         }
 
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(to right, #fff, var(--primary-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .subtitle {
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-            font-size: 0.95rem;
-        }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .tool-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        header {
             text-align: center;
+            margin-bottom: 64px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            margin: 0;
+            color: white;
+            text-shadow: 0 0 20px rgba(129, 140, 248, 0.5);
+        }
+        header p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 8px auto 0;
+        }
+        
+        .status-indicator {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 16px;
+        }
+        .status-indicator .fa-thumbs-up {
+            color: var(--success-color);
+            margin-right: 8px;
         }
 
-        .tool-card:hover {
-            background: rgba(129, 140, 248, 0.1);
-            border-color: var(--primary-accent);
-            transform: translateY(-5px);
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        @media (min-width: 768px) { .main-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .card {
+            background: var(--surface-glass);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.2s; }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .tool-card i {
-            font-size: 2rem;
-            color: var(--primary-accent);
-            margin-bottom: 1rem;
-        }
+        #host-info-card { grid-column: 1 / -1; }
 
-        .status-badge {
+        .card-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .card-header .icon { flex-shrink: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background-color: var(--primary-accent); color: white; }
+        .card-header h2 { font-size: 1.25rem; font-weight: 600; margin: 0; }
+        
+        button {
+            font-family: inherit; font-size: 0.875rem; font-weight: 500;
+            padding: 10px 16px; cursor: pointer; border-radius: 8px;
+            border: 1px solid var(--primary-accent);
+            background-color: transparent; color: var(--primary-accent);
+            transition: all 0.2s ease;
+        }
+        button:hover { background-color: var(--primary-accent); color: white; }
+        
+        .response-box { margin-top: 16px; padding: 12px; border-radius: 6px; background-color: var(--bg-dark-space); font-family: monospace; font-size: 0.875rem; color: var(--text-secondary); }
+        .response-box.success { color: var(--success-color); }
+        .response-box.error { color: var(--error-color); }
+
+        .loader { width: 24px; height: 24px; border: 3px solid var(--border-glow); border-top-color: var(--primary-accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .info-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+        @media (min-width: 1024px) { .info-grid { grid-template-columns: 2fr 1fr; } }
+        
+        .system-info { margin-bottom: 1.5rem; }
+        .info-card { display: flex; gap: 1rem; padding: 1.25rem; background: rgba(255, 255, 255, 0.03); border-radius: 12px; }
+        .info-icon { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: var(--primary-accent); border-radius: 10px; font-size: 1.5rem; }
+        .info-content h3 { margin: 0 0 0.5rem 0; font-size: 1rem; color: var(--text-secondary); }
+        .info-content .model { margin: 0 0 0.75rem 0; font-size: 1.1rem; font-weight: 500; }
+        .info-content .details { margin: 0; display: flex; gap: 1rem; color: var(--text-secondary); font-size: 0.9rem; }
+        .detail-item { display: flex; align-items: center; gap: 0.5rem; }
+        .monitor-card { padding: 1.25rem; background: rgba(255, 255, 255, 0.03); border-radius: 12px; }
+        .resource-bar { margin-bottom: 1rem; }
+        .resource-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; }
+        .resource-header i { margin-right: 0.5rem; color: var(--primary-accent); }
+        .progress-track { height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary-accent), #4f46e5); border-radius: 4px; transition: width 0.3s ease; }
+
+        /* --- Nouveau Design: Badge Service Opérationnel --- */
+        .status-badge-clean {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: rgba(52, 211, 153, 0.1);
-            color: var(--success-color);
-            border-radius: 100px;
-            font-size: 0.85rem;
-            font-weight: 500;
+            gap: 10px;
+            padding: 8px 16px;
+            background-color: rgba(52, 211, 153, 0.1); 
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            border-radius: 50px; 
+            color: var(--success-color); 
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            user-select: none;
         }
 
-        .pulse {
+        .status-badge-clean .dot {
             width: 8px;
             height: 8px;
-            background: var(--success-color);
+            background-color: var(--success-color);
             border-radius: 50%;
-            animation: pulse-animation 2s infinite;
+            animation: smoothPulse 2s ease-in-out infinite alternate;
         }
 
-        @keyframes pulse-animation {
-            0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        @keyframes smoothPulse {
+            0% { opacity: 0.5; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+            100% { opacity: 1; box-shadow: 0 0 8px 1px rgba(52, 211, 153, 0.5); }
         }
     </style>
 </head>
 <body>
-
+    <div id="particles-js"></div>
     <div class="container">
-        <h1>Infrastructure MediaSchool</h1>
-        <p class="subtitle">Bienvenue sur votre portail d'administration sécurisé.</p>
-
-        <div class="card-grid">
-            <a id="link-pma" href="#" class="tool-card">
-                <i class="fas fa-database"></i>
-                <span>Base de données</span>
-                <small style="color: var(--text-secondary); margin-top: 0.5rem;">PhpMyAdmin</small>
-            </a>
-
-            <a id="link-api" href="#" class="tool-card">
-                <i class="fas fa-server"></i>
-                <span>API Backend</span>
-                <small style="color: var(--text-secondary); margin-top: 0.5rem;">Statut Système</small>
-            </a>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div class="status-badge">
-                <div class="pulse"></div>
-                Serveur Opérationnel
+        <header>
+            <h1>MediaSchool Portail</h1>
+            <p>Tableau de bord et page de garde du docker de développement.</p>
+            <p class="status-indicator">
+                <i class="fas fa-thumbs-up"></i> Font Awesome est bien installé !
+            </p>
+        </header>
+        <main class="main-grid">
+            <div class="card">
+                <div class="card-header"><div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.54 15H17l-2 6-4-12-2 6H2.46"></path></svg></div><h2>Backend Link Status :</h2></div>
+                <button onclick="pingBackend()">Lancer le Ping</button>
+                <div id="response" class="response-box">En attente de connexion...</div>
             </div>
-            <span style="font-size: 0.8rem; color: var(--text-secondary);" id="display-user">Utilisateur : ...</span>
-        </div>
+            
+            <div class="card">
+                <div class="card-header"><div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16"></path><path d="M8 8H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4"></path><path d="M16 16h4a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-4"></path></svg></div><h2>Database - MySQL :</h2></div>
+                
+                <div class="status-badge-clean">
+                    <span class="dot"></span>
+                    Service Opérationnel
+                </div>
+
+            </div>
+            
+            <div id="host-info-card" class="card">
+                <div class="card-header"><div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect><line x1="2" y1="8" x2="22" y2="8"></line><line x1="2" y1="14" x2="22" y2="14"></line></svg></div><h2>Informations sur le serveur :</h2></div>
+                <div id="host-info-grid"><div class="loader"></div></div>
+            </div>
+        </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
     <script>
+        // --- Variables globales ---
+        let currentUsername = "default";
+
+        // --- Configuration des particules ---
+        tsParticles.load("particles-js", {
+            fpsLimit: 60,
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#818cf8" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: true, anim: { enable: true, speed: 0.4, opacity_min: 0.1, sync: false } },
+                size: { value: 2, random: true },
+                links: { enable: true, distance: 150, color: "#818cf8", opacity: 0.2, width: 1 },
+                move: { enable: true, speed: 1, direction: "none", random: true, straight: false, out_mode: "out" },
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: false } },
+                modes: { grab: { distance: 140, line_opacity: 0.5 } },
+            },
+            retina_detect: true,
+        });
+
+        // --- Logique applicative ---
+        const hostInfoStructure = `
+            <div class="info-grid">
+                <div class="system-info">
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fas fa-microchip"></i></div>
+                        <div class="info-content">
+                            <h3>Processeur</h3>
+                            <p class="model"><span id="cpu-model">...</span></p>
+                            <p class="details">
+                                <span class="detail-item"><i class="fas fa-tachometer-alt"></i><span id="cpu-freq">...</span></span>
+                                <span class="detail-item"><i class="fas fa-layer-group"></i><span id="cpu-cores">...</span> cœurs</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="resources-monitor">
+                    <div class="monitor-card">
+                        <div class="resource-bar">
+                            <div class="resource-header">
+                                <span><i class="fas fa-memory"></i> Mémoire RAM</span>
+                                <span class="value" id="ram-value">...</span>
+                            </div>
+                            <div class="progress-track"><div class="progress-fill" id="ram-fill" style="width: 0%"></div></div>
+                        </div>
+                        <div class="resource-bar">
+                            <div class="resource-header">
+                                <span><i class="fas fa-hdd"></i> Espace Disque</span>
+                                <span class="value" id="disk-value">...</span>
+                            </div>
+                            <div class="progress-track"><div class="progress-fill" id="disk-fill" style="width: 0%"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+        async function pingBackend() {
+            const el = document.getElementById('response');
+            el.className = 'response-box'; el.textContent = 'Ping en cours...';
+            try {
+                const response = await fetch('/index.php');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.text();
+                el.innerHTML = `<i class="fas fa-check-circle" style="margin-right: 8px;"></i>Réponse : "${data}"`;
+                el.classList.add('success');
+            } catch (error) {
+                el.textContent = `Échec : ${error.message}`; el.classList.add('error');
+            }
+        }
+
+        async function fetchHostInfo() {
+            const grid = document.getElementById('host-info-grid');
+            try {
+                const response = await fetch('/host-info.php');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const info = await response.json();
+                if (info.error) throw new Error(info.error.message);
+
+                if (info.username) {
+                    currentUsername = info.username;
+                }
+
+                if (!grid.querySelector('.info-grid')) grid.innerHTML = hostInfoStructure;
+
+                document.getElementById('cpu-model').textContent = info.cpu.model;
+                document.getElementById('cpu-freq').textContent = `${info.cpu.frequency_ghz} GHz`;
+                document.getElementById('cpu-cores').textContent = info.cpu.cores;
+                document.getElementById('ram-value').textContent = `${info.memory.used_gb} / ${info.memory.total_gb} GB`;
+                document.getElementById('ram-fill').style.width = `${info.memory.percentage}%`;
+                document.getElementById('disk-value').textContent = `${info.disk.used_gb} / ${info.disk.total_gb} GB`;
+                document.getElementById('disk-fill').style.width = `${info.disk.percentage}%`;
+
+            } catch (error) {
+                grid.innerHTML = `<div class="response-box error">Erreur de chargement des stats : ${error.message}</div>`;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Détecter l'utilisateur depuis l'URL (ex: env-tiago.iris.a3n.fr)
-            const hostname = window.location.hostname;
-            let username = "default";
-
-            if (hostname.includes('env-')) {
-                // Extrait 'tiago' de 'env-tiago.iris.a3n.fr'
-                username = hostname.split('.')[0].replace('env-', '');
-            }
-
-            // 2. Mettre à jour les liens avec le port 4433
-            const pmaLink = document.getElementById('link-pma');
-            const apiLink = document.getElementById('link-api');
-            const userDisplay = document.getElementById('display-user');
-
-            if (pmaLink) {
-                pmaLink.href = `https://pma-env-${username}.iris.a3n.fr:4433`;
-            }
-
-            if (apiLink) {
-                // Si ton API est aussi sur le port 4433 ou un autre
-                apiLink.href = `https://env-${username}.iris.a3n.fr:4433/api`;
-            }
-
-            if (userDisplay) {
-                userDisplay.textContent = `Environnement : ${username.toUpperCase()}`;
-            }
-
-            console.log(`Configuration appliquée pour l'utilisateur : ${username}`);
+            fetchHostInfo();
+            setInterval(fetchHostInfo, 1000);
         });
     </script>
 </body>
