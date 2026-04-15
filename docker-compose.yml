@@ -1,0 +1,55 @@
+services:
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    networks:
+      - app-net
+      - admin_proxy
+    labels:
+      - "traefik.enable=true"
+      # Configuration HTTPS
+      - "traefik.http.routers.${USERNAME}-front.rule=Host(`env-${USERNAME}.iris.a3n.fr`)"
+      - "traefik.http.routers.${USERNAME}-front.entrypoints=websecure"
+      - "traefik.http.routers.${USERNAME}-front.tls=true"
+      # Traefik envoie le trafic sur le port 80 interne de ton conteneur Nginx
+      - "traefik.http.services.${USERNAME}-front.loadbalancer.server.port=80"
+      # Sécurité : On force l'utilisation du réseau admin_proxy pour éviter les erreurs 504
+      - "traefik.docker.network=admin_proxy"
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    networks:
+      - app-net
+
+  db:
+    image: mariadb:11.5
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: mediaschooldb
+      MYSQL_USER: mediaschooluser
+      MYSQL_PASSWORD: mediaschoolpass
+    networks:
+      - app-net
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+    networks:
+      - app-net
+      - admin_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${USERNAME}-pma.rule=Host(`pma-env-${USERNAME}.iris.a3n.fr`)"
+      - "traefik.http.routers.${USERNAME}-pma.entrypoints=websecure"
+      - "traefik.http.routers.${USERNAME}-pma.tls=true"
+      - "traefik.http.services.${USERNAME}-pma.loadbalancer.server.port=80"
+      - "traefik.docker.network=admin_proxy"
+
+networks:
+  app-net:
+  admin_proxy:
+    external: true

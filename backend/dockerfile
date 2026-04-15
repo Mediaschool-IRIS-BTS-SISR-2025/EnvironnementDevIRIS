@@ -1,0 +1,34 @@
+# ./backend/Dockerfile
+
+# Utilisation de l'image FPM Alpine pour un conteneur plus léger et sécurisé
+FROM php:8.2-fpm-alpine
+
+# --- Installation des extensions PHP et des outils ---
+# Les extensions FPM sont souvent plus limitées sur Alpine,
+# il faut installer les dépendances (librairies) nécessaires (ex: libpq-dev, zlib-dev, etc.)
+# pour compiler les extensions (ici pdo et pdo_mysql)
+
+# Installe les dépendances nécessaires et les extensions PHP
+RUN apk update && apk add --no-cache \
+    git \
+    zip \
+    unzip \
+    mysql-client \
+    && docker-php-ext-install pdo pdo_mysql 
+
+# Nettoyage des caches APK
+RUN rm -rf /var/cache/apk/*
+
+# --- Installation de Composer ---
+# Copie le binaire Composer depuis son image dédiée pour plus de fiabilité
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer 
+
+# --- Configuration de l'application ---
+# Définir le répertoire de travail
+WORKDIR /var/www/html
+
+# Copie le code source PHP dans le conteneur
+COPY src/ /var/www/html/
+
+# Commande par défaut pour lancer PHP-FPM
+CMD ["php-fpm"]
