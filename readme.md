@@ -94,6 +94,37 @@ Suivre les logs:
 docker compose logs -f
 ```
 
+## Troubleshooting : 403 Forbidden sur le frontend (ou 404 sur les .php)
+
+Les services `frontend` et `backend` utilisent des bind-mounts vers `./frontend/src`
+et `./backend/src`. Si ton home Linux est en mode `700` (cas par defaut sur
+beaucoup de distros), Nginx et PHP-FPM tournant dans les conteneurs ne peuvent
+pas traverser `/home/<user>` pour atteindre les fichiers, ce qui donne :
+
+- `403 Forbidden` sur `/` (Nginx ne peut pas lire `index.html`)
+- `404 Not Found` sur `/host-info.php` ou `/index.php` (PHP-FPM ne voit pas les fichiers)
+
+Diagnostic :
+
+```bash
+docker compose logs frontend --tail=30
+namei -l ~/EnvironnementDevIRIS/frontend/src/index.html
+```
+
+Si tu vois `Permission denied` dans les logs ou un dossier sans `r-x` pour
+`others` dans la chaine `namei`, applique le fix :
+
+```bash
+chmod o+x /home/$USER
+chmod -R o+rX ~/EnvironnementDevIRIS
+docker compose restart frontend backend
+```
+
+Le `X` majuscule met `+x` uniquement sur les dossiers (traversee), pas sur les
+fichiers. `chmod o+x` sur le home le rend traversable mais pas listable
+(pas de `r`), donc les autres utilisateurs ne peuvent toujours pas voir
+le contenu de ton home.
+
 ## Base de donnees
 
 Variables configurees dans `docker-compose.yml`:
