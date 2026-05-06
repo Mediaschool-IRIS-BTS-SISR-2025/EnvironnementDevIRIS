@@ -2,6 +2,9 @@ services:
   frontend:
     build: ./frontend
     restart: unless-stopped
+    volumes:
+      - ./frontend/src:/usr/share/nginx/html:ro
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
     networks:
       - app-net
       - admin_proxy
@@ -31,6 +34,8 @@ services:
   backend:
     build: ./backend
     restart: unless-stopped
+    volumes:
+      - ./backend/src:/var/www/html
     networks:
       - app-net
 
